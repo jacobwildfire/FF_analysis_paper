@@ -863,8 +863,8 @@ full_surv_plot_proportion <- surv_baseline_endline %>%
 
 
 baseline_vs_endline_surv_plot_sites <- rbind(df_surv_impl.time_baseline_long, df_surv_impl.time_endline_long) %>%
-  mutate(grouping2 = ifelse(grouping2 == "0", "First", "Final"),
-         grouping2 = factor(grouping2, levels = c("First", "Final")),
+  mutate(grouping2 = ifelse(grouping2 == "0", "First\nreport", "Final\nreport"),
+         grouping2 = factor(grouping2, levels = c("First\nreport", "Final\nreport")),
          `Level` = factor(Level, levels = c("not_applicable", "advanced",
                                             "extended", "core", "precore"))) %>%
   group_by(`grouping2`,`LSHTM subcomponent`, Level) %>%
@@ -890,7 +890,7 @@ baseline_vs_endline_surv_plot_sites <- rbind(df_surv_impl.time_baseline_long, df
              precore = "Precore",
              not_applicable = "Not applicable"
   ))+
-  xlab("Measurement")+
+  xlab("Reporting timepoint")+
   ylab("Number of sites")+
   scale_y_continuous()+
   theme(axis.text = element_text(size = 12), strip.text = element_text(size = 12),
@@ -898,8 +898,8 @@ baseline_vs_endline_surv_plot_sites <- rbind(df_surv_impl.time_baseline_long, df
 
 
 baseline_vs_endline_surv_plot_prop <- rbind(df_surv_impl.time_baseline_long, df_surv_impl.time_endline_long) %>%
-  mutate(grouping2 = ifelse(grouping2 == "0", "First", "Final"),
-         grouping2 = factor(grouping2, levels = c("First", "Final")),
+  mutate(grouping2 = ifelse(grouping2 == "0", "First\nreport", "Final\nreport"),
+         grouping2 = factor(grouping2, levels = c("First\nreport", "Final\nreport")),
          `Level` = factor(Level, levels = c("not_applicable", "advanced",
                                             "extended", "core", "precore"))) %>%
   group_by(`grouping2`,`LSHTM subcomponent`, Level) %>%
@@ -925,7 +925,7 @@ baseline_vs_endline_surv_plot_prop <- rbind(df_surv_impl.time_baseline_long, df_
              precore = "Precore",
              not_applicable = "Not applicable"
   ))+
-  xlab("Measurement")+
+  xlab("Reporting timepoint")+
   ylab("Proportion of sites")+
   scale_y_continuous()+
   theme(axis.text = element_text(size = 12), strip.text = element_text(size = 12),
@@ -1697,7 +1697,7 @@ plot_surv_change_site_level_phase1 <- ggplot() +
     limits = c("Baseline", "End"),
     expand = c(0.2, 0.1),
     name = "Reporting timepoint",
-    labels = c("Baseline" = "Phase 1\nbaseline", "End" = "Phase 2\nendline")
+    labels = c("Baseline" = "First\nreport", "End" = "Final\nreport")
   )+
   geom_text(aes(label = count, y = value, x = timepoint),position = position_nudge(x = -0.21), data = subset(text, timepoint == "Baseline"),
             hjust = 0, size = 4)+
