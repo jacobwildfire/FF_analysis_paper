@@ -1712,5 +1712,15 @@ plot_surv_change_site_level_phase1 <- ggplot() +
 
 
 
+ggsave(paste0("Figures/Drafts/AH 1. surv_sites_baseline_vs_endline_count_phase1_only",".png"), baseline_vs_endline_surv_plot_sites, width = 20.6, height = 11.25, dpi =300)
+
+ggsave(paste0("Figures/Drafts/AH 2a. surv_phase1_sites_count",".png"), plot_surv_phase1_count, width = 16.5, height = 9, dpi =300)
+ggsave(paste0("Figures/Drafts/AH 2b. surv_phase1_sites_prop",".png"), plot_surv_phase1, width = 16.5, height = 9, dpi =300)
+
+ggsave(paste0("Figures/Drafts/AH 2c. surv_phase2_sites_count",".png"), plot_surv_phase2_count, width = 16.5, height = 9, dpi =300)
+ggsave(paste0("Figures/Drafts/AH 2d. surv_phase2_sites_prop",".png"), plot_surv_phase2, width = 16.5, height = 9, dpi =300)
+
+ggsave(paste0("Figures/Drafts/AH 3. surv_phase1_baseline_vs_endline_change_count",".png"), plot_surv_change_site_level_phase1, width = 18.6, height = 10.15, dpi =300)
+
 
 
