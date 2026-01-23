@@ -1734,7 +1734,7 @@ plot_surv_change_site_level_phase1 <- ggplot() +
     color = guide_legend(override.aes = list(linewidth = 3))   # For size legend
   )
 
-ggsave(paste0("Figures/Drafts/Countries/HH 1. surv_sites_baseline_vs_endline_prop_phase1_only",i,".png"), baseline_vs_endline_surv_plot_sites, width = 20.6, height = 11.25, dpi =300)
+ggsave(paste0("Figures/Drafts/Countries/HH 1. surv_sites_baseline_vs_endline_count_phase1_only",i,".png"), baseline_vs_endline_surv_plot_sites, width = 20.6, height = 11.25, dpi =300)
 
 ggsave(paste0("Figures/Drafts/Countries/HH 2a. surv_phase1_sites_count",i,".png"), plot_surv_phase1_count, width = 16.5, height = 9, dpi =300)
 ggsave(paste0("Figures/Drafts/Countries/HH 2b. surv_phase1_sites_prop",i,".png"), plot_surv_phase1, width = 16.5, height = 9, dpi =300)

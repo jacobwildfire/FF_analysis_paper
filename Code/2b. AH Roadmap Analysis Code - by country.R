@@ -138,6 +138,40 @@ df_long <- date_conversion(df_long)%>%
   ungroup()
 
 
+df_long <- df_long %>%
+  mutate(Country = case_when(
+    sitecode %like% c("BDL%") ~ "Bangladesh",
+    sitecode %like% c("BTL%") ~ "Bhutan",
+    sitecode %like% c("SZL%") ~ "Eswatini",
+    sitecode %like% c("GHL%") ~ "Ghana",
+    sitecode %like% c("IDL%") ~ "Indonesia",
+    sitecode %like% c("KEL%") ~ "Kenya",
+    sitecode %like% c("LAL%") ~ "Laos",
+    sitecode %like% c("MWL%") ~ "Malawi",
+    sitecode %like% c("NPL%") ~ "Nepal",
+    sitecode %like% c("NGL%") ~ "Nigeria",
+    sitecode %like% c("PKL%") ~ "Pakistan",
+    sitecode %like% c("PGL%") ~ "PNG",
+    sitecode %like% c("RWL%") ~ "Rwanda",
+    sitecode %like% c("SNL%") ~ "Senegal",
+    sitecode %like% c("SLL%") ~ "Sierra Leone",
+    sitecode %like% c("LKL%") ~ "Sri Lanka",
+    sitecode %like% c("TZL%") ~ "Tanzania",
+    sitecode %like% c("TLL%") ~ "Timor-Leste",
+    sitecode %like% c("UGL%") ~ "Uganda",
+    sitecode %like% c("VNL%") ~ "Vietnam",
+    sitecode %like% c("ZML%") ~ "Zambia",
+    sitecode %like% c("ZWL%") ~ "Zimbabwe"
+  )) %>%
+  select(12, 1:11)
+
+df_long2 <- subset(df_long,Country!="Timor-Leste")
+
+
+
+for (i in unique(df_long2$Country)){
+  
+  df_long <- subset(df_long2, Country == i)
 
 
 # Generate summary dataframes, calculating the proportion of "Precore", "Core", 
@@ -337,7 +371,7 @@ df_surv_long <- date_conversion(df_surv_long)%>%
                                           "not_applicable",
                                           "no_answer")))
 
-
+if (nrow(df_ref_long)>0){
 # Conversion of ref dataset.
 df_ref_long <- date_conversion(df_ref_long)%>%
   mutate(Level = factor(Level, levels = c("precore",
@@ -346,7 +380,7 @@ df_ref_long <- date_conversion(df_ref_long)%>%
                                           "advanced",
                                           "not_applicable",
                                           "no_answer")))
-
+}
 longer_surv_dates <- subset(df_surv_long, as.Date(`End date`) > "2024-01-01")
 longer_surv_dates[as.Date(longer_surv_dates$`End date`) == "2024-06-30", "End date"] <- as.Date("2024-03-31")
 longer_surv_dates[as.Date(longer_surv_dates$`End date`) == "2024-12-31", "End date"] <- as.Date("2024-09-30")
@@ -355,14 +389,14 @@ longer_surv_dates[as.Date(longer_surv_dates$`End date`) == "2025-06-30", "End da
 
 df_surv_long_col <- rbind(df_surv_long, longer_surv_dates)
 
-
+if (nrow(df_ref_long)>0){
 longer_ref_dates <- subset(df_ref_long, as.Date(`End date`) > "2024-01-01")
 longer_ref_dates[as.Date(longer_ref_dates$`End date`) == "2024-06-30", "End date"] <- as.Date("2024-03-31")
 longer_ref_dates[as.Date(longer_ref_dates$`End date`) == "2024-12-31", "End date"] <- as.Date("2024-09-30")
 longer_ref_dates[as.Date(longer_ref_dates$`End date`) == "2025-06-30", "End date"] <- as.Date("2025-03-31")
 
 df_ref_long_col <- rbind(df_ref_long, longer_ref_dates)
-
+}
 
 
 ## Plots demonstrating percentage of sites over time
@@ -418,7 +452,7 @@ plot_surv_inverse <- ggplot(df_surv_long_col, aes(x=as.Date(`End date`), y = Pro
   theme(axis.text = element_text(size = 12), strip.text = element_text(size = 12),
         legend.text = element_text(size = 12), axis.y.title = element_text(size = 12))
 
-
+if (nrow(df_ref_long_col)>0){
 plot_ref <- df_ref_long_col %>%
   mutate(Level = factor(Level, levels = c("not_applicable","advanced","extended","core","precore"))) %>%
   ggplot(aes(x=as.Date(`End date`), y = Proportion, fill = Level))+
@@ -469,7 +503,7 @@ plot_ref_inverse <- ggplot(df_ref_long_col, aes(x=as.Date(`End date`), y = Propo
   theme(axis.text = element_text(size = 12), strip.text = element_text(size = 12),
         legend.text = element_text(size = 12), axis.y.title = element_text(size = 12))
 
-
+}
 
 ## Plots demonstrating numbers of sites over time
 
@@ -521,7 +555,7 @@ plot_surv_inverse_count <- ggplot(df_surv_long_col, aes(x=as.Date(`End date`), y
   theme(axis.text = element_text(size = 12), strip.text = element_text(size = 12),
         legend.text = element_text(size = 12), axis.y.title = element_text(size = 12))
 
-
+if (nrow(df_ref_long_col)>0){
 plot_ref_count <- df_ref_long_col %>%
   mutate(Level = factor(Level, levels = c("not_applicable","advanced","extended","core","precore"))) %>%
   ggplot(aes(x=as.Date(`End date`), y = Sites, fill = Level))+
@@ -571,7 +605,7 @@ plot_ref_inverse_count <- ggplot(df_ref_long_col, aes(x=as.Date(`End date`), y =
         legend.text = element_text(size = 12), axis.y.title = element_text(size = 12))
 
 
-
+}
 
 
 ########################################### Analyses by time spent in programme:
@@ -670,7 +704,7 @@ plot_surv_impl.time <- df_surv_long_impl.time %>%
 ## Plots using the baseline and endline values
 
 df_surv_impl.time_baseline <- df_long %>%
-  filter(type == "Surveillance") %>%
+  filter(type == "Surveillance"& `Baseline` < "2024-01-01") %>%
   arrange(`Start date`) %>%
   group_by(`LSHTM subcomponent`,sitecode) %>%
   filter(row_number() == 1) %>%
@@ -711,7 +745,7 @@ df_surv_impl.time_baseline_long <- df_surv_impl.time_baseline %>%
 
 
 df_surv_impl.time_endline <- df_long %>%
-  filter(type == "Surveillance") %>%
+  filter(type == "Surveillance"& `Baseline` < "2024-01-01") %>%
   arrange(`Start date`) %>%
   group_by(`LSHTM subcomponent`,sitecode) %>%
   slice(n()) %>%
@@ -1282,7 +1316,7 @@ df_surv_phase1_long <- date_conversion(df_surv_phase1_long)%>%
                                           "advanced",
                                           "not_applicable",
                                           "no_answer")))
-
+if (nrow(df_surv_phase2_long)>0){
 df_surv_phase2_long <- date_conversion(df_surv_phase2_long)%>%
   mutate(Level = factor(Level, levels = c("precore",
                                           "core",
@@ -1290,8 +1324,9 @@ df_surv_phase2_long <- date_conversion(df_surv_phase2_long)%>%
                                           "advanced",
                                           "not_applicable",
                                           "no_answer")))
+}
 
-
+if (nrow(df_ref_phase1_long)>0){
 # Conversion of ref dataset.
 df_ref_phase1_long <- date_conversion(df_ref_phase1_long)%>%
   mutate(Level = factor(Level, levels = c("precore",
@@ -1300,7 +1335,9 @@ df_ref_phase1_long <- date_conversion(df_ref_phase1_long)%>%
                                           "advanced",
                                           "not_applicable",
                                           "no_answer")))
+}
 
+if (nrow(df_ref_phase2_long)>0){
 df_ref_phase2_long <- date_conversion(df_ref_phase2_long)%>%
   mutate(Level = factor(Level, levels = c("precore",
                                           "core",
@@ -1308,7 +1345,7 @@ df_ref_phase2_long <- date_conversion(df_ref_phase2_long)%>%
                                           "advanced",
                                           "not_applicable",
                                           "no_answer")))
-
+}
 
 longer_surv_phase1_dates <- subset(df_surv_phase1_long, as.Date(`End date`) > "2024-01-01")
 longer_surv_phase1_dates[as.Date(longer_surv_phase1_dates$`End date`) == "2024-06-30", "End date"] <- as.Date("2024-03-31")
@@ -1317,7 +1354,7 @@ longer_surv_phase1_dates[as.Date(longer_surv_phase1_dates$`End date`) == "2025-0
 
 
 df_surv_phase1_long_col <- rbind(df_surv_phase1_long, longer_surv_phase1_dates)
-
+if (nrow(df_surv_phase2_long)>0){
 longer_surv_phase2_dates <- subset(df_surv_phase2_long, as.Date(`End date`) > "2024-01-01")
 longer_surv_phase2_dates[as.Date(longer_surv_phase2_dates$`End date`) == "2024-06-30", "End date"] <- as.Date("2024-03-31")
 longer_surv_phase2_dates[as.Date(longer_surv_phase2_dates$`End date`) == "2024-12-31", "End date"] <- as.Date("2024-09-30")
@@ -1325,9 +1362,9 @@ longer_surv_phase2_dates[as.Date(longer_surv_phase2_dates$`End date`) == "2025-0
 
 
 df_surv_phase2_long_col <- rbind(df_surv_phase2_long, longer_surv_phase2_dates)
+}
 
-
-
+if (nrow(df_ref_phase1_long)>0){
 longer_ref_phase1_dates <- subset(df_ref_phase1_long, as.Date(`End date`) > "2024-01-01")
 longer_ref_phase1_dates[as.Date(longer_ref_phase1_dates$`End date`) == "2024-06-30", "End date"] <- as.Date("2024-03-31")
 longer_ref_phase1_dates[as.Date(longer_ref_phase1_dates$`End date`) == "2024-12-31", "End date"] <- as.Date("2024-09-30")
@@ -1335,7 +1372,9 @@ longer_ref_phase1_dates[as.Date(longer_ref_phase1_dates$`End date`) == "2025-06-
 
 
 df_ref_phase1_long_col <- rbind(df_ref_phase1_long, longer_ref_phase1_dates)
+}
 
+if (nrow(df_ref_phase2_long)>0){
 longer_ref_phase2_dates <- subset(df_ref_phase2_long, as.Date(`End date`) > "2024-01-01")
 longer_ref_phase2_dates[as.Date(longer_ref_phase2_dates$`End date`) == "2024-06-30", "End date"] <- as.Date("2024-03-31")
 longer_ref_phase2_dates[as.Date(longer_ref_phase2_dates$`End date`) == "2024-12-31", "End date"] <- as.Date("2024-09-30")
@@ -1343,7 +1382,7 @@ longer_ref_phase2_dates[as.Date(longer_ref_phase2_dates$`End date`) == "2025-06-
 
 
 df_ref_phase2_long_col <- rbind(df_ref_phase2_long, longer_ref_phase2_dates)
-
+}
 
 
 
@@ -1452,7 +1491,7 @@ plot_surv_phase1_inverse_count <- ggplot(df_surv_phase1_long_col, aes(x=as.Date(
 
 
 ## Plots demonstrating percentage of sites over time - surv phase 1
-
+if (nrow(df_surv_phase2_long)>0){
 plot_surv_phase2 <- df_surv_phase2_long_col %>%
   mutate(Level = factor(Level, levels = c("not_applicable","advanced","extended","core","precore"))) %>%
   ggplot(aes(x=as.Date(`End date`), y = Proportion, fill = Level))+
@@ -1552,21 +1591,14 @@ plot_surv_phase2_inverse_count <- ggplot(df_surv_phase2_long_col, aes(x=as.Date(
   ylab("Number of sites")+
   theme(axis.text = element_text(size = 12), strip.text = element_text(size = 12),
         legend.text = element_text(size = 12), axis.y.title = element_text(size = 12))
-
+}
 
 ## This graph was a step in the right direction, demonstrating how sites have collectively changed over time.
 ## However, since sites joined at different times, and reported at different times, and didn't all have
 ## the same final reporting date, there are too many data points to reasonably
 ## make sense of the trends and changes.
 
-df_long %>%
-  subset(type == "Surveillance" & value != "Not applicable" & total_time >= 60) %>%
-  mutate(value = factor(value, levels = c("Precore", "Core", "Extended", "Advanced"))) %>%
-  ggplot(aes(x=`Months in programme`, y = value)) +
-  facet_wrap(~`LSHTM subcomponent`,
-             labeller = labeller(`LSHTM subcomponent` = custom_labels), nrow = 3)+
-  geom_count() +
-  geom_line(aes(group = sitecode), alpha=0.2)
+
 
 
 ## Therefore, the following code simplifies this process, by distilling it down into
@@ -1608,7 +1640,7 @@ plot_surv_change_site_level_phase1 <- df_long_phase1 %>%
   geom_count() +
   geom_line(aes(group = sitecode), alpha=0.2)
 
-
+if (nrow(df_surv_phase2_long)>0){
 ## Looking at Phase 2 sites separately:
 ## These are the initial plots which informed the final product.
 df_long_phase2_start <- df_long %>%
@@ -1637,7 +1669,7 @@ plot_surv_change_site_level_phase2 <- df_long_phase2 %>%
              labeller = labeller(`LSHTM subcomponent` = custom_labels), nrow = 3)+
   geom_count() +
   geom_line(aes(group = sitecode), alpha=0.2)
-
+}
 
 
 
@@ -1710,7 +1742,17 @@ plot_surv_change_site_level_phase1 <- ggplot() +
     color = guide_legend(override.aes = list(linewidth = 3))   # For size legend
   )
 
+ggsave(paste0("Figures/Drafts/Countries/AH 1. surv_sites_baseline_vs_endline_count_phase1_only",i,".png"), baseline_vs_endline_surv_plot_sites, width = 20.6, height = 11.25, dpi =300)
 
+ggsave(paste0("Figures/Drafts/Countries/AH 2a. surv_phase1_sites_count",i,".png"), plot_surv_phase1_count, width = 16.5, height = 9, dpi =300)
+ggsave(paste0("Figures/Drafts/Countries/AH 2b. surv_phase1_sites_prop",i,".png"), plot_surv_phase1, width = 16.5, height = 9, dpi =300)
+if (nrow(df_surv_phase2_long)>0){
+  ggsave(paste0("Figures/Drafts/Countries/AH 2c. surv_phase2_sites_count",i,".png"), plot_surv_phase2_count, width = 16.5, height = 9, dpi =300)
+  ggsave(paste0("Figures/Drafts/Countries/AH 2d. surv_phase2_sites_prop",i,".png"), plot_surv_phase2, width = 16.5, height = 9, dpi =300)
+}
+ggsave(paste0("Figures/Drafts/Countries/AH 3. surv_phase1_baseline_vs_endline_change_count",i,".png"), plot_surv_change_site_level_phase1, width = 18.6, height = 10.15, dpi =300)
+
+}
 
 
 

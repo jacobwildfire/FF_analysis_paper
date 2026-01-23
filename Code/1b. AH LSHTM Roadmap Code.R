@@ -62,7 +62,7 @@ site_info <- read_xlsx("~/M&E/2025Q3/On-going updates_Master List of Sentinel Si
 
 ah_all_df <- data.frame(
   site = NA, sitecode = NA, type = NA, sector = NA, reporting.month = NA,
-  a1_guidelines = NA, b1_sops = NA, b2_soptraining = NA, b3_qc = NA, b4_qctraining = NA,
+  a1_guidelines = NA, a2_laboratoryResults = NA, b1_sops = NA, b2_soptraining = NA, b3_qc = NA, b4_qctraining = NA,
   b5_participateeqa = NA, b6_provideeqa = NA,
   a1_transport_sop = NA, a2_transop_training = NA, a3_transop_followed = NA,
   ecoli = NA, salmonella = NA, enterococci = NA, campylobacter = NA, others = NA,
@@ -82,7 +82,7 @@ ah_all_df <- data.frame(
 
 ## Generate a workbook into which tiers will be calculated
 ah_tiers_df <- data.frame(
-  site = NA, sitecode = NA, type = NA, sector = NA, reporting.month = NA,
+  site = NA, sitecode = NA, type = NA, sector = NA, reporting.month = NA, tier1a1 = NA, tier1a2 = NA, tier1a3 = NA,
   tier1a = NA, tier1b1 = NA, tier1b2 = NA, tier1b3 = NA, tier1b4 = NA, tier1b5 = NA, tier1b6 = NA, tier1b = NA,
   tier2a1 = NA, tier2a2 = NA, tier2a3 = NA, tier2a = NA,
   tier2b1ecoli = NA, tier2b1salmonella = NA, tier2b1enterococci = NA, tier2b1campylobacter = NA,
@@ -103,6 +103,7 @@ ah_tiers_df <- data.frame(
   
 ## Identify LSHTM roadmap relevant dataelements:
 dataelements <- c("ah_lshtm_1a1_guidelines",
+                  "ah_6i1_laboratoryResults",
                   "ah_lshtm_1b1_sops",
                   "ah_lshtm_1b2_soptraining",
                   "ah_lshtm_1b3_qc",
@@ -203,6 +204,10 @@ for (i in unique(ah_all_df[is.na(ah_all_df$type),"sitecode"])){
 for (i in df_wide$key) {
   if (!is.na(df_wide[df_wide$key == i, "lshtm_1a1_guidelines"])) {
     ah_all_df[ah_all_df$key == i, "a1_guidelines"] <- df_wide[df_wide$key == i, "lshtm_1a1_guidelines"]
+  }
+  
+  if (!is.na(df_wide[df_wide$key == i, "6i1_laboratoryResults"])) {
+    ah_all_df[ah_all_df$key == i, "a2_laboratoryResults"] <- df_wide[df_wide$key == i, "6i1_laboratoryResults"]
   }
   
   if (!is.na(df_wide[df_wide$key == i, "lshtm_1b1_sops"])) {
@@ -376,15 +381,87 @@ ah_all_df <- ah_all_df %>%
 ## Calculate subcomponent 1
 
 ############# Calculating tiers of component 1
+## 
+##
+##
 
+## Calculating tiers for 1a1
+##
+## Required for "Core" for 1a
 
 for (i in ah_all_df$key){
   if (ah_all_df[ah_all_df$key == i, "a1_guidelines"] %like% c("Yes")) {
+    ah_tiers_df[ah_tiers_df$key == i, "tier1a1"] <- "Core"
+  } else {
+    ah_tiers_df[ah_tiers_df$key == i, "tier1a1"] <- "Precore"
+  }
+}
+
+
+## Calculating tiers for 1a2
+##
+## Required for "Core" for 1a
+
+for (i in ah_all_df$key){
+  if (ah_all_df[ah_all_df$key == i, "a2_laboratoryResults"] %like% c("On local computers%",
+                                                                     "Using WHONET", "LIMS system other than WHONET%")) {
+    ah_tiers_df[ah_tiers_df$key == i, "tier1a2"] <- "Extended"
+  } else if (ah_all_df[ah_all_df$key == i, "a2_laboratoryResults"] %like% c("Paper log books")) {
+    ah_tiers_df[ah_tiers_df$key == i, "tier1a2"] <- "Core"
+  } else {
+    ah_tiers_df[ah_tiers_df$key == i, "tier1a2"] <- "Precore"}
+}
+
+## Calculating tiers for 4b2 (early, as this question is also relevant to tier1a)
+##
+## Required for "Core" for 1a
+for (i in ah_all_df$key){
+  if (ah_all_df[ah_all_df$key == i, "b2_uniqueid"] %like% c("Yes")) {
+    ah_tiers_df[ah_tiers_df$key == i, "tier4b2"] <- "Core"
+  } else {
+    ah_tiers_df[ah_tiers_df$key == i, "tier4b2"] <- "Precore"
+  }
+}
+
+
+## Calculating tiers for 4a3 (early, as this question is also relevant to tier1a)
+##
+## Required for "Extended" for 1a
+for (i in ah_all_df$key){
+  if (ah_all_df[ah_all_df$key == i, "a3_datasharing_guidelines"] %like% c("Yes")) {
+    ah_tiers_df[ah_tiers_df$key == i, "tier1a3"] <- "Extended"
+    ah_tiers_df[ah_tiers_df$key == i, "tier4a3"] <- "Core"
+  } else {
+    ah_tiers_df[ah_tiers_df$key == i, "tier1a3"] <- "Precore"
+    ah_tiers_df[ah_tiers_df$key == i, "tier4a3"] <- "Precore"
+  }
+}
+
+
+##### Calculating overall tiers for 1a
+##
+##
+## Requires 1a1, 1a2 and 4b2 to be "Core" for "Core" to be achieved.
+## In addition, for "Extended", requires 1a3 to be "Extended".
+
+for (i in ah_all_df$key){
+  if (ah_tiers_df[ah_tiers_df$key == i, "tier1a1"] == "Core" &
+      ah_tiers_df[ah_tiers_df$key == i, "tier1a2"] == "Extended" &
+      ah_tiers_df[ah_tiers_df$key == i, "tier1a3"] == "Extended" &
+      ah_tiers_df[ah_tiers_df$key == i, "tier4b2"] == "Core") {
+    ah_tiers_df[ah_tiers_df$key == i, "tier1a"] <- "Extended"
+  } else if (ah_tiers_df[ah_tiers_df$key == i, "tier1a1"] == "Core" &
+             (ah_tiers_df[ah_tiers_df$key == i, "tier1a3"] == "Core"|
+              ah_tiers_df[ah_tiers_df$key == i, "tier1a2"] == "Core") &
+             ah_tiers_df[ah_tiers_df$key == i, "tier1a3"] != "Precore" &
+             ah_tiers_df[ah_tiers_df$key == i, "tier1a2"] != "Precore" &
+             ah_tiers_df[ah_tiers_df$key == i, "tier4b2"] == "Core") {
     ah_tiers_df[ah_tiers_df$key == i, "tier1a"] <- "Core"
   } else {
     ah_tiers_df[ah_tiers_df$key == i, "tier1a"] <- "Precore"
   }
 }
+
 
 
 ## Calculating tiers for Subcomponent 1b - 
@@ -731,9 +808,9 @@ for (i in ah_all_df$key){
 ## So I have made the conservative option to assign "Core".
 
 for (i in ah_all_df$key){
-  if (ah_all_df[ah_all_df$key == i, "c1_ast_system"] %like% c("Automated method%")) {
+  if (ah_all_df[ah_all_df$key == i, "c1_ast_system"] %like% c("MIC testing", "Automated method%")) {
     ah_tiers_df[ah_tiers_df$key == i, "tier2c1"] <- "Advanced"
-  } else if (ah_all_df[ah_all_df$key == i, "c1_ast_system"] %in% c("Disc diffusion", "MIC testing")) {
+  } else if (ah_all_df[ah_all_df$key == i, "c1_ast_system"] %in% c("Disc diffusion")) {
     ah_tiers_df[ah_tiers_df$key == i, "tier2c1"] <- "Core"
   } else {
     ah_tiers_df[ah_tiers_df$key == i, "tier2c1"] <- "Precore"
@@ -826,7 +903,7 @@ for (i in ah_all_df$key){
 
 for (i in ah_all_df$key){
   if (ah_all_df[ah_all_df$key == i, "d2_ast_training_othersites"] %like any% c("%Yes%", "%yes%")) {
-    ah_tiers_df[ah_tiers_df$key == i, "tier2d2"] <- "Extended"
+    ah_tiers_df[ah_tiers_df$key == i, "tier2d2"] <- "Advanced"
   } else {
     ah_tiers_df[ah_tiers_df$key == i, "tier2d2"] <- "Precore"
   }
@@ -842,15 +919,21 @@ for (i in ah_all_df$key){
 
 for (i in ah_all_df$key){
   if (ah_tiers_df[ah_tiers_df$key == i, "tier2d1"] == "Core" &
-      ah_tiers_df[ah_tiers_df$key == i, "tier2d2"] == "Extended") {
+      ah_tiers_df[ah_tiers_df$key == i, "tier1b5"] == "Extended" &
+      ah_tiers_df[ah_tiers_df$key == i, "tier2d2"] == "Advanced") {
+    ah_tiers_df[ah_tiers_df$key == i, "tier2d"] <- "Advanced"
+  } else if (ah_tiers_df[ah_tiers_df$key == i, "tier2d1"] == "Core" &
+             ah_tiers_df[ah_tiers_df$key == i, "tier1b5"] == "Extended" &
+             ah_tiers_df[ah_tiers_df$key == i, "tier2d2"] != "Advanced") {
     ah_tiers_df[ah_tiers_df$key == i, "tier2d"] <- "Extended"
   } else if (ah_tiers_df[ah_tiers_df$key == i, "tier2d1"] == "Core" &
-             ah_tiers_df[ah_tiers_df$key == i, "tier2d2"] != "Extended") {
+             ah_tiers_df[ah_tiers_df$key == i, "tier1b5"] != "Extended") {
     ah_tiers_df[ah_tiers_df$key == i, "tier2d"] <- "Core"
   } else {
     ah_tiers_df[ah_tiers_df$key == i, "tier2d"] <- "Precore"
   }
 }
+
 
 
 
@@ -1116,16 +1199,6 @@ for (i in ah_all_df$key){
 }
 
 
-## Calculating tiers for 4a3
-
-for (i in ah_all_df$key){
-  if (ah_all_df[ah_all_df$key == i, "a3_datasharing_guidelines"] %like% c("Yes")) {
-    ah_tiers_df[ah_tiers_df$key == i, "tier4a3"] <- "Core"
-  } else {
-    ah_tiers_df[ah_tiers_df$key == i, "tier4a3"] <- "Precore"
-  }
-}
-
 
 ## Calculating tiers for 4a4
 
@@ -1185,16 +1258,6 @@ for (i in ah_all_df$key){
 }
 
 
-## Calculating tiers for 4b2
-
-for (i in ah_all_df$key){
-  if (ah_all_df[ah_all_df$key == i, "b2_uniqueid"] %like% c("Yes")) {
-    ah_tiers_df[ah_tiers_df$key == i, "tier4b2"] <- "Core"
-  } else {
-    ah_tiers_df[ah_tiers_df$key == i, "tier4b2"] <- "Precore"
-  }
-}
-
 
 
 ##### Calculating overall tiers for 4b - 
@@ -1205,9 +1268,11 @@ for (i in ah_all_df$key){
 
 for (i in ah_all_df$key){
   if (ah_tiers_df[ah_tiers_df$key == i, "tier4b1"] == "Advanced" &
-      ah_tiers_df[ah_tiers_df$key == i, "tier4b2"] == "Core" ) {
+      ah_tiers_df[ah_tiers_df$key == i, "tier1b5"] == "Extended" &
+      ah_tiers_df[ah_tiers_df$key == i, "tier4b2"] == "Core") {
     ah_tiers_df[ah_tiers_df$key == i, "tier4b"] <- "Advanced"
   } else if (ah_tiers_df[ah_tiers_df$key == i, "tier4b1"] == "Extended" &
+             ah_tiers_df[ah_tiers_df$key == i, "tier1b5"] == "Extended" &
              ah_tiers_df[ah_tiers_df$key == i, "tier4b2"] == "Core") {
     ah_tiers_df[ah_tiers_df$key == i, "tier4b"] <- "Extended" 
   } else if (ah_tiers_df[ah_tiers_df$key == i, "tier4b1"] == "Core" &
