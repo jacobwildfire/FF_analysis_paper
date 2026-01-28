@@ -1742,6 +1742,78 @@ plot_surv_change_site_level_phase1 <- ggplot() +
     color = guide_legend(override.aes = list(linewidth = 3))   # For size legend
   )
 
+#### Produce graph demonstrating changes in sites but combining sites that
+#### are "Core" or above, to demonstrate this larger jump.
+
+segments_ver2_phase1 <- df_long_phase1 %>%
+  subset(type == "Surveillance" & value != "Not applicable" & timepoint != "Middle") %>%
+  mutate(timepoint = factor(timepoint, levels = c("Baseline", "Middle", "End")),
+         value = ifelse(value %in% c("Core", "Extended", "Advanced"), "Core or above", "Precore"),
+         value = factor(value, levels = c("Precore", "Core or above"))) %>%
+  arrange(sitecode, timepoint) %>%
+  group_by(sitecode, `LSHTM subcomponent`) %>%
+  mutate(next_timepoint = lead(timepoint),
+         next_value = lead(value)) %>%
+  ungroup() %>%
+  filter(timepoint == "Baseline" & next_timepoint == "End") %>%
+  group_by(`LSHTM subcomponent`, timepoint, value, next_timepoint, next_value) %>%
+  summarise(count = n(), .groups = "drop") %>%
+  mutate(direction = factor(case_when(
+    as.numeric(next_value) > as.numeric(value) ~ "Increase",
+    as.numeric(next_value) < as.numeric(value) ~ "Decrease",
+    TRUE ~ "No change"
+  ), levels = c("No change", "Decrease", "Increase")),
+  timepoint = factor(timepoint, levels = c("Baseline", "Middle", "End")),
+  nudge = ifelse(timepoint == "Baseline", -0.2, 0.2))  # Order for plotting
+
+text_ver2 <- df_long_phase1%>%
+  subset(type == "Surveillance" & value != "Not applicable" & timepoint != "Middle") %>%
+  mutate(timepoint = factor(timepoint, levels = c("Baseline", "Middle", "End")),
+         value = ifelse(value %in% c("Core", "Extended", "Advanced"), "Core or above", "Precore"),
+         value = factor(value, levels = c("Precore", "Core or above"))) %>%
+  arrange(sitecode, timepoint) %>%
+  group_by(timepoint, `LSHTM subcomponent`, value) %>%
+  summarise(count = n())
+
+# Plot
+plot_surv_change_site_level_phase1_ver2 <- ggplot() +
+  facet_wrap(~`LSHTM subcomponent`,
+             labeller = labeller(`LSHTM subcomponent` = custom_labels), nrow = 3) +
+  geom_segment(data = segments_ver2_phase1 %>% arrange(direction),
+               aes(x = timepoint, y = value,
+                   xend = next_timepoint, yend = next_value,
+                   size = count,color = direction), alpha = 0.6,
+               lineend = "round") +
+  geom_count(data = df_long_phase1 %>%
+               subset(type == "Surveillance" & value != "Not applicable" & timepoint != "Middle") %>%
+               mutate(timepoint = factor(timepoint, levels = c("Baseline", "Middle", "End")),
+                      value = ifelse(value %in% c("Core", "Extended", "Advanced"), "Core or above", "Precore"),
+                      value = factor(value, levels = c("Precore", "Core or above"))),
+             aes(x = timepoint, y = value)) +
+  scale_size_continuous(range = c(1, 7), name = "Number\nof sites") +
+  scale_color_manual(values = c("Increase" = "lightblue", "Decrease" = "lightpink", "No change" = "grey80"), name = "Change\ndirection") +
+  scale_y_discrete(name = c("Level"), expand = c(0.15,0.15))+
+  theme_bw()+
+  scale_x_discrete(
+    limits = c("Baseline", "End"),
+    expand = c(0.2, 0.1),
+    name = "Reporting timepoint",
+    labels = c("Baseline" = "First\nreport", "End" = "Final\nreport")
+  )+
+  geom_text(aes(label = count, y = value, x = timepoint),position = position_nudge(x = -0.21), data = subset(text_ver2, timepoint == "Baseline"),
+            hjust = 0, size = 4)+
+  geom_text(aes(label = count, y = value, x = timepoint),position = position_nudge(x = +0.1), data = subset(text_ver2, timepoint == "End"),
+            hjust = 0, size = 4)+
+  theme(axis.text = element_text(size = 12), strip.text = element_text(size = 12),
+        legend.text = element_text(size = 12), axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12))+
+  guides(
+    color = guide_legend(override.aes = list(linewidth = 3))   # For size legend
+  )
+
+
+
+
 ggsave(paste0("Figures/Drafts/Countries/AH 1. surv_sites_baseline_vs_endline_count_phase1_only",i,".png"), baseline_vs_endline_surv_plot_sites, width = 20.6, height = 11.25, dpi =300)
 
 ggsave(paste0("Figures/Drafts/Countries/AH 2a. surv_phase1_sites_count",i,".png"), plot_surv_phase1_count, width = 16.5, height = 9, dpi =300)
@@ -1750,7 +1822,8 @@ if (nrow(df_surv_phase2_long)>0){
   ggsave(paste0("Figures/Drafts/Countries/AH 2c. surv_phase2_sites_count",i,".png"), plot_surv_phase2_count, width = 16.5, height = 9, dpi =300)
   ggsave(paste0("Figures/Drafts/Countries/AH 2d. surv_phase2_sites_prop",i,".png"), plot_surv_phase2, width = 16.5, height = 9, dpi =300)
 }
-ggsave(paste0("Figures/Drafts/Countries/AH 3. surv_phase1_baseline_vs_endline_change_count",i,".png"), plot_surv_change_site_level_phase1, width = 18.6, height = 10.15, dpi =300)
+ggsave(paste0("Figures/Drafts/Countries/AH 3. surv_phase1_baseline_vs_endline_change_count",i,".png"), plot_surv_change_site_level_phase1, width = 14, height = 8, dpi =300)
+ggsave(paste0("Figures/Drafts/Countries/AH 3. surv_phase1_baseline_vs_endline_change_count_ver2_",i,".png"), plot_surv_change_site_level_phase1_ver2, width = 14, height = 6.5, dpi =300)
 
 }
 
