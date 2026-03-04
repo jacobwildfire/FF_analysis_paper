@@ -351,6 +351,7 @@ longer_surv_dates <- subset(df_surv_long, as.Date(`End date`) > "2024-01-01")
 longer_surv_dates[as.Date(longer_surv_dates$`End date`) == "2024-06-30", "End date"] <- as.Date("2024-03-31")
 longer_surv_dates[as.Date(longer_surv_dates$`End date`) == "2024-12-31", "End date"] <- as.Date("2024-09-30")
 longer_surv_dates[as.Date(longer_surv_dates$`End date`) == "2025-06-30", "End date"] <- as.Date("2025-03-31")
+longer_surv_dates[as.Date(longer_surv_dates$`End date`) == "2025-12-31", "End date"] <- as.Date("2025-09-30")
 
 
 df_surv_long_col <- rbind(df_surv_long, longer_surv_dates)
@@ -360,6 +361,7 @@ longer_ref_dates <- subset(df_ref_long, as.Date(`End date`) > "2024-01-01")
 longer_ref_dates[as.Date(longer_ref_dates$`End date`) == "2024-06-30", "End date"] <- as.Date("2024-03-31")
 longer_ref_dates[as.Date(longer_ref_dates$`End date`) == "2024-12-31", "End date"] <- as.Date("2024-09-30")
 longer_ref_dates[as.Date(longer_ref_dates$`End date`) == "2025-06-30", "End date"] <- as.Date("2025-03-31")
+longer_ref_dates[as.Date(longer_ref_dates$`End date`) == "2025-12-31", "End date"] <- as.Date("2025-09-30")
 
 df_ref_long_col <- rbind(df_ref_long, longer_ref_dates)
 
@@ -1314,6 +1316,7 @@ longer_surv_phase1_dates <- subset(df_surv_phase1_long, as.Date(`End date`) > "2
 longer_surv_phase1_dates[as.Date(longer_surv_phase1_dates$`End date`) == "2024-06-30", "End date"] <- as.Date("2024-03-31")
 longer_surv_phase1_dates[as.Date(longer_surv_phase1_dates$`End date`) == "2024-12-31", "End date"] <- as.Date("2024-09-30")
 longer_surv_phase1_dates[as.Date(longer_surv_phase1_dates$`End date`) == "2025-06-30", "End date"] <- as.Date("2025-03-31")
+longer_surv_phase1_dates[as.Date(longer_surv_phase1_dates$`End date`) == "2025-12-31", "End date"] <- as.Date("2025-09-30")
 
 
 df_surv_phase1_long_col <- rbind(df_surv_phase1_long, longer_surv_phase1_dates)
@@ -1322,6 +1325,7 @@ longer_surv_phase2_dates <- subset(df_surv_phase2_long, as.Date(`End date`) > "2
 longer_surv_phase2_dates[as.Date(longer_surv_phase2_dates$`End date`) == "2024-06-30", "End date"] <- as.Date("2024-03-31")
 longer_surv_phase2_dates[as.Date(longer_surv_phase2_dates$`End date`) == "2024-12-31", "End date"] <- as.Date("2024-09-30")
 longer_surv_phase2_dates[as.Date(longer_surv_phase2_dates$`End date`) == "2025-06-30", "End date"] <- as.Date("2025-03-31")
+longer_surv_phase2_dates[as.Date(longer_surv_phase2_dates$`End date`) == "2025-12-31", "End date"] <- as.Date("2025-09-30")
 
 
 df_surv_phase2_long_col <- rbind(df_surv_phase2_long, longer_surv_phase2_dates)
@@ -1332,6 +1336,7 @@ longer_ref_phase1_dates <- subset(df_ref_phase1_long, as.Date(`End date`) > "202
 longer_ref_phase1_dates[as.Date(longer_ref_phase1_dates$`End date`) == "2024-06-30", "End date"] <- as.Date("2024-03-31")
 longer_ref_phase1_dates[as.Date(longer_ref_phase1_dates$`End date`) == "2024-12-31", "End date"] <- as.Date("2024-09-30")
 longer_ref_phase1_dates[as.Date(longer_ref_phase1_dates$`End date`) == "2025-06-30", "End date"] <- as.Date("2025-03-31")
+longer_ref_phase1_dates[as.Date(longer_ref_phase1_dates$`End date`) == "2025-12-31", "End date"] <- as.Date("2025-09-30")
 
 
 df_ref_phase1_long_col <- rbind(df_ref_phase1_long, longer_ref_phase1_dates)
@@ -1340,6 +1345,7 @@ longer_ref_phase2_dates <- subset(df_ref_phase2_long, as.Date(`End date`) > "202
 longer_ref_phase2_dates[as.Date(longer_ref_phase2_dates$`End date`) == "2024-06-30", "End date"] <- as.Date("2024-03-31")
 longer_ref_phase2_dates[as.Date(longer_ref_phase2_dates$`End date`) == "2024-12-31", "End date"] <- as.Date("2024-09-30")
 longer_ref_phase2_dates[as.Date(longer_ref_phase2_dates$`End date`) == "2025-06-30", "End date"] <- as.Date("2025-03-31")
+longer_ref_phase2_dates[as.Date(longer_ref_phase2_dates$`End date`) == "2025-12-31", "End date"] <- as.Date("2025-09-30")
 
 
 df_ref_phase2_long_col <- rbind(df_ref_phase2_long, longer_ref_phase2_dates)
@@ -1554,19 +1560,6 @@ plot_surv_phase2_inverse_count <- ggplot(df_surv_phase2_long_col, aes(x=as.Date(
         legend.text = element_text(size = 12), axis.y.title = element_text(size = 12))
 
 
-## This graph was a step in the right direction, demonstrating how sites have collectively changed over time.
-## However, since sites joined at different times, and reported at different times, and didn't all have
-## the same final reporting date, there are too many data points to reasonably
-## make sense of the trends and changes.
-
-df_long %>%
-  subset(type == "Surveillance" & value != "Not applicable" & total_time >= 60) %>%
-  mutate(value = factor(value, levels = c("Precore", "Core", "Extended", "Advanced"))) %>%
-  ggplot(aes(x=`Months in programme`, y = value)) +
-  facet_wrap(~`LSHTM subcomponent`,
-             labeller = labeller(`LSHTM subcomponent` = custom_labels), nrow = 3)+
-  geom_count() +
-  geom_line(aes(group = sitecode), alpha=0.2)
 
 
 ## Therefore, the following code simplifies this process, by distilling it down into

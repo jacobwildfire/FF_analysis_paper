@@ -346,6 +346,8 @@ longer_surv_dates <- subset(df_surv_long, as.Date(`End date`) > "2024-01-01")
 longer_surv_dates[as.Date(longer_surv_dates$`End date`) == "2024-06-30", "End date"] <- as.Date("2024-03-31")
 longer_surv_dates[as.Date(longer_surv_dates$`End date`) == "2024-12-31", "End date"] <- as.Date("2024-09-30")
 longer_surv_dates[as.Date(longer_surv_dates$`End date`) == "2025-06-30", "End date"] <- as.Date("2025-03-31")
+longer_surv_dates[as.Date(longer_surv_dates$`End date`) == "2025-12-31", "End date"] <- as.Date("2025-09-30")
+
 
 
 df_surv_long_col <- rbind(df_surv_long, longer_surv_dates)
@@ -355,6 +357,8 @@ longer_ref_dates <- subset(df_ref_long, as.Date(`End date`) > "2024-01-01")
 longer_ref_dates[as.Date(longer_ref_dates$`End date`) == "2024-06-30", "End date"] <- as.Date("2024-03-31")
 longer_ref_dates[as.Date(longer_ref_dates$`End date`) == "2024-12-31", "End date"] <- as.Date("2024-09-30")
 longer_ref_dates[as.Date(longer_ref_dates$`End date`) == "2025-06-30", "End date"] <- as.Date("2025-03-31")
+longer_ref_dates[as.Date(longer_ref_dates$`End date`) == "2025-12-31", "End date"] <- as.Date("2025-09-30")
+
 
 df_ref_long_col <- rbind(df_ref_long, longer_ref_dates)
 
@@ -1308,6 +1312,7 @@ longer_surv_phase1_dates <- subset(df_surv_phase1_long, as.Date(`End date`) > "2
 longer_surv_phase1_dates[as.Date(longer_surv_phase1_dates$`End date`) == "2024-06-30", "End date"] <- as.Date("2024-03-31")
 longer_surv_phase1_dates[as.Date(longer_surv_phase1_dates$`End date`) == "2024-12-31", "End date"] <- as.Date("2024-09-30")
 longer_surv_phase1_dates[as.Date(longer_surv_phase1_dates$`End date`) == "2025-06-30", "End date"] <- as.Date("2025-03-31")
+longer_surv_phase1_dates[as.Date(longer_surv_phase1_dates$`End date`) == "2025-12-31", "End date"] <- as.Date("2025-09-30")
 
 
 df_surv_phase1_long_col <- rbind(df_surv_phase1_long, longer_surv_phase1_dates)
@@ -1316,6 +1321,7 @@ longer_surv_phase2_dates <- subset(df_surv_phase2_long, as.Date(`End date`) > "2
 longer_surv_phase2_dates[as.Date(longer_surv_phase2_dates$`End date`) == "2024-06-30", "End date"] <- as.Date("2024-03-31")
 longer_surv_phase2_dates[as.Date(longer_surv_phase2_dates$`End date`) == "2024-12-31", "End date"] <- as.Date("2024-09-30")
 longer_surv_phase2_dates[as.Date(longer_surv_phase2_dates$`End date`) == "2025-06-30", "End date"] <- as.Date("2025-03-31")
+longer_surv_phase2_dates[as.Date(longer_surv_phase2_dates$`End date`) == "2025-12-31", "End date"] <- as.Date("2025-09-30")
 
 
 df_surv_phase2_long_col <- rbind(df_surv_phase2_long, longer_surv_phase2_dates)
@@ -1326,6 +1332,7 @@ longer_ref_phase1_dates <- subset(df_ref_phase1_long, as.Date(`End date`) > "202
 longer_ref_phase1_dates[as.Date(longer_ref_phase1_dates$`End date`) == "2024-06-30", "End date"] <- as.Date("2024-03-31")
 longer_ref_phase1_dates[as.Date(longer_ref_phase1_dates$`End date`) == "2024-12-31", "End date"] <- as.Date("2024-09-30")
 longer_ref_phase1_dates[as.Date(longer_ref_phase1_dates$`End date`) == "2025-06-30", "End date"] <- as.Date("2025-03-31")
+longer_ref_phase1_dates[as.Date(longer_ref_phase1_dates$`End date`) == "2025-12-31", "End date"] <- as.Date("2025-09-30")
 
 
 df_ref_phase1_long_col <- rbind(df_ref_phase1_long, longer_ref_phase1_dates)
@@ -1334,6 +1341,7 @@ longer_ref_phase2_dates <- subset(df_ref_phase2_long, as.Date(`End date`) > "202
 longer_ref_phase2_dates[as.Date(longer_ref_phase2_dates$`End date`) == "2024-06-30", "End date"] <- as.Date("2024-03-31")
 longer_ref_phase2_dates[as.Date(longer_ref_phase2_dates$`End date`) == "2024-12-31", "End date"] <- as.Date("2024-09-30")
 longer_ref_phase2_dates[as.Date(longer_ref_phase2_dates$`End date`) == "2025-06-30", "End date"] <- as.Date("2025-03-31")
+longer_ref_phase2_dates[as.Date(longer_ref_phase2_dates$`End date`) == "2025-12-31", "End date"] <- as.Date("2025-09-30")
 
 
 df_ref_phase2_long_col <- rbind(df_ref_phase2_long, longer_ref_phase2_dates)
@@ -1677,7 +1685,7 @@ plot_surv_change_site_level_phase1 <- ggplot() +
     limits = c("Baseline", "End"),
     expand = c(0.2, 0.1),
     name = "Reporting timepoint",
-    labels = c("Baseline" = "Phase 1\nbaseline", "End" = "Phase 2\nendline")
+    labels = c("Baseline" = "First\nreport", "End" = "Final\nreport")
   )+
   geom_text(aes(label = count, y = value, x = timepoint),position = position_nudge(x = -0.21), data = subset(text, timepoint == "Baseline"),
             hjust = 0, size = 4)+
