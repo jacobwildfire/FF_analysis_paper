@@ -25,7 +25,8 @@
 
 # List of required packages
 required_packages <- c("ggplot2", "dplyr", "readxl", "writexl", "stringr", 
-                       "tidyr", "DescTools", "shiny", "lubridate", "purrr")
+                       "tidyr", "DescTools", "shiny", "lubridate", "purrr",
+                       "patchwork")
 
 # Install missing packages
 missing_packages <- required_packages[!(required_packages %in% installed.packages()[,"Package"])]
@@ -1769,6 +1770,107 @@ plot_surv_change_site_level_phase1_ver2 <- ggplot() +
 
 
 
+## Paper plots
+
+paper_hh_time_plot <- df_surv_phase1_long_col %>%
+  subset(`LSHTM subcomponent` %in% c("tier1a", "tier2c", "tier3a", "tier4a")) %>%
+  mutate(Level = factor(Level, levels = c("not_applicable","advanced","extended","core","precore"))) %>%
+  ggplot(aes(x=as.Date(`End date`), y = Sites, fill = Level))+
+  geom_col(width = 92)+
+  facet_wrap(~ `LSHTM subcomponent`,
+             labeller = labeller(`LSHTM subcomponent` = custom_labels), nrow = 3)+
+  scale_fill_manual(name = "Standard",
+                    values = c(advanced = "#FDE725FF",
+                               extended = "#B6D443",
+                               core = "#70C261",
+                               precore = "#440154FF",
+                               not_applicable = "grey"
+                    ),
+                    breaks=c('not_applicable','advanced', 'extended', 'core', 'precore'),
+                    labels = c(advanced = "Advanced",
+                               extended = "Extended",
+                               core = "Core",
+                               precore = "Precore",
+                               not_applicable = "Not applicable"
+                    ))+
+  xlab("")+
+  ylab("Number of sites")+
+  scale_x_date(breaks = scales::pretty_breaks())+
+  scale_y_continuous(breaks = scales::pretty_breaks())+
+  theme(axis.text = element_text(size = 12), strip.text = element_text(size = 12),
+        legend.text = element_text(size = 12), axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12))
+
+paper_hh_change_plot <- ggplot() +
+  facet_wrap(~`LSHTM subcomponent`,
+             labeller = labeller(`LSHTM subcomponent` = custom_labels), nrow = 3) +
+  geom_segment(data = subset(segments_phase1, `LSHTM subcomponent` %in% c("tier1a", "tier2c", "tier3a", "tier4a")) %>% arrange(direction),
+               aes(x = timepoint, y = value,
+                   xend = next_timepoint, yend = next_value,
+                   size = count,color = direction), alpha = 0.6,
+               lineend = "round") +
+  geom_count(data = subset(df_long_phase1, `LSHTM subcomponent` %in% c("tier1a", "tier2c", "tier3a", "tier4a")) %>%
+               subset(type == "Surveillance" & value != "Not applicable" & timepoint != "Middle") %>%
+               mutate(timepoint = factor(timepoint, levels = c("Baseline", "Middle", "End")),
+                      value = factor(value, levels = c("Precore", "Core", "Extended", "Advanced"))),
+             aes(x = timepoint, y = value)) +
+  scale_size_continuous(range = c(1, 7), name = "Number\nof sites") +
+  scale_color_manual(values = c("Increase" = "lightblue", "Decrease" = "lightpink", "No change" = "grey80"), name = "Change\ndirection") +
+  scale_y_discrete(name = c("Standard"))+
+  theme_bw()+
+  scale_x_discrete(
+    limits = c("Baseline", "End"),
+    expand = c(0.2, 0.1),
+    name = "Reporting timepoint",
+    labels = c("Baseline" = "First\nreport", "End" = "Final\nreport")
+  )+
+  geom_text(aes(label = count, y = value, x = timepoint),position = position_nudge(x = -0.21), data = subset(text, timepoint == "Baseline" & `LSHTM subcomponent` %in% c("tier1a", "tier2c", "tier3a", "tier4a")),
+            hjust = 0, size = 4)+
+  geom_text(aes(label = count, y = value, x = timepoint),position = position_nudge(x = +0.1), data = subset(text, timepoint == "End" & `LSHTM subcomponent` %in% c("tier1a", "tier2c", "tier3a", "tier4a")),
+            hjust = 0, size = 4)+
+  theme(axis.text = element_text(size = 12), strip.text = element_text(size = 12),
+        legend.text = element_text(size = 12), axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12))+
+  guides(
+    color = guide_legend(override.aes = list(linewidth = 3))   # For size legend
+  )
+
+
+paper_hh_change_plot_v2 <- ggplot() +
+  facet_wrap(~`LSHTM subcomponent`,
+             labeller = labeller(`LSHTM subcomponent` = custom_labels), nrow = 3) +
+  geom_segment(data = subset(segments_ver2_phase1, `LSHTM subcomponent` %in% c("tier1a", "tier2c", "tier3a", "tier4a")) %>% arrange(direction),
+               aes(x = timepoint, y = value,
+                   xend = next_timepoint, yend = next_value,
+                   size = count,color = direction), alpha = 0.6,
+               lineend = "round") +
+  geom_count(data = subset(df_long_phase1, `LSHTM subcomponent` %in% c("tier1a", "tier2c", "tier3a", "tier4a")) %>%
+               subset(type == "Surveillance" & value != "Not applicable" & timepoint != "Middle") %>%
+               mutate(timepoint = factor(timepoint, levels = c("Baseline", "Middle", "End")),
+                      value = ifelse(value %in% c("Core", "Extended", "Advanced"), "Core or above", "Precore"),
+                      value = factor(value, levels = c("Precore", "Core or above"))),
+             aes(x = timepoint, y = value)) +
+  scale_size_continuous(range = c(1, 7), name = "Number\nof sites") +
+  scale_color_manual(values = c("Increase" = "lightblue", "Decrease" = "lightpink", "No change" = "grey80"), name = "Change\ndirection") +
+  scale_y_discrete(name = c("Level"), expand = c(0.15,0.15))+
+  theme_bw()+
+  scale_x_discrete(
+    limits = c("Baseline", "End"),
+    expand = c(0.2, 0.1),
+    name = "Reporting timepoint",
+    labels = c("Baseline" = "First\nreport", "End" = "Final\nreport")
+  )+
+  geom_text(aes(label = count, y = value, x = timepoint),position = position_nudge(x = -0.21), data = subset(text_ver2, timepoint == "Baseline" & `LSHTM subcomponent` %in% c("tier1a", "tier2c", "tier3a", "tier4a")),
+            hjust = 0, size = 4)+
+  geom_text(aes(label = count, y = value, x = timepoint),position = position_nudge(x = +0.1), data = subset(text_ver2, timepoint == "End" & `LSHTM subcomponent` %in% c("tier1a", "tier2c", "tier3a", "tier4a")),
+            hjust = 0, size = 4)+
+  theme(axis.text = element_text(size = 12), strip.text = element_text(size = 12),
+        legend.text = element_text(size = 12), axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12))+
+  guides(
+    color = guide_legend(override.aes = list(linewidth = 3))   # For size legend
+  )
+
 ggsave(paste0("Figures/Drafts/HH 1. surv_sites_baseline_vs_endline_count_phase1_only",".png"), baseline_vs_endline_surv_plot_sites, width = 20.6, height = 11.25, dpi =300)
 
 ggsave(paste0("Figures/Drafts/HH 2a. surv_phase1_sites_count",".png"), plot_surv_phase1_count, width = 16.5, height = 9, dpi =300)
@@ -1780,6 +1882,10 @@ ggsave(paste0("Figures/Drafts/HH 2d. surv_phase2_sites_prop",".png"), plot_surv_
 ggsave(paste0("Figures/Drafts/HH 3. surv_phase1_baseline_vs_endline_change_count",".png"), plot_surv_change_site_level_phase1, width = 18, height = 8, dpi =300)
 ggsave(paste0("Figures/Drafts/HH 3. surv_phase1_baseline_vs_endline_change_count_ver2",".png"), plot_surv_change_site_level_phase1_ver2, width = 18.4, height = 6.5, dpi =300)
 
+## paper
+ggsave(paste0("Figures/Drafts/HH 4. surv_phase1_sites_count_time_paper",".png"), paper_hh_time_plot, width = 9, height = 5, dpi =300)
+ggsave(paste0("Figures/Drafts/HH 4. surv_phase1_sites_count_change_paper",".png"), paper_hh_change_plot, width = 9, height = 5, dpi =300)
+ggsave(paste0("Figures/Drafts/HH 4. surv_phase1_sites_count_change_paper_v2",".png"), paper_hh_change_plot_v2, width = 9, height = 5, dpi =300)
 
 
 
