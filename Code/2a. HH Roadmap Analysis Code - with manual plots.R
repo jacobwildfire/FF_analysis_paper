@@ -39,7 +39,7 @@ for(pkg in required_packages) {
 }
 
 
-
+plot_layout()
 
 #################################### Working Directory
 
@@ -1776,6 +1776,7 @@ paper_hh_time_plot <- df_surv_phase1_long_col %>%
   subset(`LSHTM subcomponent` %in% c("tier1a", "tier2c", "tier3a", "tier4a")) %>%
   mutate(Level = factor(Level, levels = c("not_applicable","advanced","extended","core","precore"))) %>%
   ggplot(aes(x=as.Date(`End date`), y = Sites, fill = Level))+
+  coord_cartesian(clip = "off") +
   geom_col(width = 92)+
   facet_wrap(~ `LSHTM subcomponent`,
              labeller = labeller(`LSHTM subcomponent` = custom_labels), nrow = 3)+
@@ -1793,14 +1794,13 @@ paper_hh_time_plot <- df_surv_phase1_long_col %>%
                                precore = "Precore",
                                not_applicable = "Not applicable"
                     ))+
-  ggtitle("Human Health")+
   xlab("")+
   ylab("Number of sites")+
   scale_x_date(breaks = scales::pretty_breaks())+
   scale_y_continuous(breaks = scales::pretty_breaks())+
   theme(axis.text = element_text(size = 12), strip.text = element_text(size = 12),
         legend.text = element_text(size = 12), axis.title = element_text(size = 12),
-        legend.title = element_text(size = 12), plot.title=element_text(hjust=0.5, face = "bold"))
+        legend.title = element_text(size = 12))
 
 paper_hh_change_plot <- ggplot() +
   facet_wrap(~`LSHTM subcomponent`,
@@ -1849,11 +1849,11 @@ paper_hh_change_plot_v2 <- ggplot() +
                subset(type == "Surveillance" & value != "Not applicable" & timepoint != "Middle") %>%
                mutate(timepoint = factor(timepoint, levels = c("Baseline", "Middle", "End")),
                       value = ifelse(value %in% c("Core", "Extended", "Advanced"), "Core or above", "Precore"),
-                      value = factor(value, levels = c("Precore", "Core or above"))),
+                      value = factor(value, levels = c("Precore", "Core\nor above"))),
              aes(x = timepoint, y = value)) +
   scale_size_continuous(range = c(1, 7), name = "Number\nof sites") +
   scale_color_manual(values = c("Increase" = "lightblue", "Decrease" = "lightpink", "No change" = "grey80"), name = "Change\ndirection") +
-  scale_y_discrete(name = c("Level"), expand = c(0.15,0.15))+
+  scale_y_discrete(name = c("Standard"), expand = c(0.15,0.15))+
   theme_bw()+
   scale_x_discrete(
     limits = c("Baseline", "End"),

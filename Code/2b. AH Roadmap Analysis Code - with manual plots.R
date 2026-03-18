@@ -1782,6 +1782,7 @@ paper_ah_time_plot <- df_surv_phase1_long_col %>%
   subset(`LSHTM subcomponent` %in% c("tier1a", "tier2c", "tier3a", "tier4a")) %>%
   mutate(Level = factor(Level, levels = c("not_applicable","advanced","extended","core","precore"))) %>%
   ggplot(aes(x=as.Date(`End date`), y = Sites, fill = Level))+
+  coord_cartesian(clip = "off") +
   geom_col(width = 92)+
   facet_wrap(~ `LSHTM subcomponent`,
              labeller = labeller(`LSHTM subcomponent` = custom_labels), nrow = 3)+
@@ -1799,14 +1800,13 @@ paper_ah_time_plot <- df_surv_phase1_long_col %>%
              precore = "Precore",
              not_applicable = "Not applicable"
   ))+
-  ggtitle("Animal Health")+
   xlab("")+
   ylab("Number of sites")+
   scale_x_date(breaks = scales::pretty_breaks())+
   scale_y_continuous(breaks = scales::pretty_breaks())+
   theme(axis.text = element_text(size = 12), strip.text = element_text(size = 12),
         legend.text = element_text(size = 12), axis.title = element_text(size = 12),
-        legend.title = element_text(size = 12), plot.title=element_text(hjust=0.5, face = "bold"))
+        legend.title = element_text(size = 12))
 
 paper_ah_change_plot <- ggplot() +
   facet_wrap(~`LSHTM subcomponent`,
@@ -1859,7 +1859,7 @@ paper_ah_change_plot_v2 <- ggplot() +
              aes(x = timepoint, y = value)) +
   scale_size_continuous(range = c(1, 7), name = "Number\nof sites") +
   scale_color_manual(values = c("Increase" = "lightblue", "Decrease" = "lightpink", "No change" = "grey80"), name = "Change\ndirection") +
-  scale_y_discrete(name = c("Level"), expand = c(0.15,0.15))+
+  scale_y_discrete(name = c("Standard"), expand = c(0.15,0.15))+
   theme_bw()+
   scale_x_discrete(
     limits = c("Baseline", "End"),
@@ -1895,10 +1895,30 @@ ggsave(paste0("Figures/Drafts/AH 4. surv_phase1_sites_count_time_paper",".png"),
 ggsave(paste0("Figures/Drafts/AH 4. surv_phase1_sites_count_change_paper",".png"), paper_ah_change_plot, width = 9, height = 5, dpi =300)
 ggsave(paste0("Figures/Drafts/AH 4. surv_phase1_sites_count_change_paper_v2",".png"), paper_ah_change_plot_v2, width = 9, height = 5, dpi =300)
 
-
-overall_plot <- (paper_hh_time_plot + paper_ah_time_plot + plot_layout(axis_titles = "collect_y", guides = "collect"))/plot_spacer()/(paper_hh_change_plot + paper_ah_change_plot + plot_layout(axis_titles = "collect_y", axes = "collect_y"))+plot_layout(heights = c(1,0.01,1))
+overall_plot <- (paper_hh_time_plot + paper_ah_time_plot + plot_layout(axis_titles = "collect_y", guides = "collect")+ggtitle("Human Health")+theme(plot.title=element_text(hjust=0.5, face = "bold")))/plot_spacer()/(paper_hh_change_plot + paper_ah_change_plot + plot_layout(axis_titles = "collect_y", axes = "collect_y"))+plot_layout(heights = c(1,0.01,1)+ggtitle("Animal Health")+theme(plot.title=element_text(hjust=0.5, face = "bold")))
 overall_plot_v2 <- (paper_hh_time_plot + paper_ah_time_plot + plot_layout(axis_titles = "collect_y", guides = "collect"))/plot_spacer()/(paper_hh_change_plot_v2 + paper_ah_change_plot_v2 + plot_layout(axis_titles = "collect_y", axes = "collect_y"))+plot_layout(heights = c(1,0.01,1))
 
 
 ggsave(paste0("Figures/Drafts/Figure1",".png"), overall_plot, width = 15, height = 10, dpi =300)
 ggsave(paste0("Figures/Drafts/Figure1_v2",".png"), overall_plot_v2, width = 15.25, height = 10, dpi =300)
+
+pt1 <- (paper_hh_time_plot|paper_hh_change_plot)+plot_annotation(title = "Human Health")& 
+  theme(plot.title = element_text(hjust = 0.465, face = "bold"), plot.tag = element_text(size = 15, face = "bold"))
+
+pt2 <- (paper_ah_time_plot|paper_ah_change_plot)+plot_annotation(title = "Animal Health")& 
+  theme(plot.title = element_text(hjust = 0.465, face = "bold"), plot.tag = element_text(size = 15, face = "bold"))
+
+comb1 <- wrap_elements(pt1)/wrap_elements(pt2) + plot_layout(heights = c(1,1))
+
+
+pt1_v2 <- (paper_hh_time_plot|paper_hh_change_plot_v2)+plot_annotation(title = "Human Health",tag_levels = list(c("a.","b.")))& 
+  theme(plot.title = element_text(hjust = 0.465, face = "bold"), plot.tag = element_text(size = 15, face = "bold"))
+
+pt2_v2 <- (paper_ah_time_plot|paper_ah_change_plot_v2)+plot_annotation(title = "Animal Health", tag_levels = list(c("c.","d.")))& 
+  theme(plot.title = element_text(hjust = 0.465, face = "bold"), plot.tag = element_text(size = 15, face = "bold"))
+
+comb1_v2 <- wrap_elements(pt1_v2)/wrap_elements(pt2_v2) + plot_layout(heights = c(1,1), axis_titles = "collect_x")
+
+
+ggsave(paste0("Figures/Drafts/Figure1_alt_layout",".png"), comb1, width = 16.32, height = 10, dpi =300)
+ggsave(paste0("Figures/Drafts/Figure1_alt_layout_v2",".png"), comb1_v2, width = 16.4, height = 11, dpi =300)
