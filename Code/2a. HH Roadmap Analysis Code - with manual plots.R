@@ -1793,13 +1793,14 @@ paper_hh_time_plot <- df_surv_phase1_long_col %>%
                                precore = "Precore",
                                not_applicable = "Not applicable"
                     ))+
+  ggtitle("Human Health")+
   xlab("")+
   ylab("Number of sites")+
   scale_x_date(breaks = scales::pretty_breaks())+
   scale_y_continuous(breaks = scales::pretty_breaks())+
   theme(axis.text = element_text(size = 12), strip.text = element_text(size = 12),
         legend.text = element_text(size = 12), axis.title = element_text(size = 12),
-        legend.title = element_text(size = 12))
+        legend.title = element_text(size = 12), plot.title=element_text(hjust=0.5, face = "bold"))
 
 paper_hh_change_plot <- ggplot() +
   facet_wrap(~`LSHTM subcomponent`,
@@ -1824,7 +1825,7 @@ paper_hh_change_plot <- ggplot() +
     name = "Reporting timepoint",
     labels = c("Baseline" = "First\nreport", "End" = "Final\nreport")
   )+
-  geom_text(aes(label = count, y = value, x = timepoint),position = position_nudge(x = -0.21), data = subset(text, timepoint == "Baseline" & `LSHTM subcomponent` %in% c("tier1a", "tier2c", "tier3a", "tier4a")),
+  geom_text(aes(label = count, y = value, x = timepoint),position = position_nudge(x = -0.23), data = subset(text, timepoint == "Baseline" & `LSHTM subcomponent` %in% c("tier1a", "tier2c", "tier3a", "tier4a")),
             hjust = 0, size = 4)+
   geom_text(aes(label = count, y = value, x = timepoint),position = position_nudge(x = +0.1), data = subset(text, timepoint == "End" & `LSHTM subcomponent` %in% c("tier1a", "tier2c", "tier3a", "tier4a")),
             hjust = 0, size = 4)+
@@ -1860,7 +1861,7 @@ paper_hh_change_plot_v2 <- ggplot() +
     name = "Reporting timepoint",
     labels = c("Baseline" = "First\nreport", "End" = "Final\nreport")
   )+
-  geom_text(aes(label = count, y = value, x = timepoint),position = position_nudge(x = -0.21), data = subset(text_ver2, timepoint == "Baseline" & `LSHTM subcomponent` %in% c("tier1a", "tier2c", "tier3a", "tier4a")),
+  geom_text(aes(label = count, y = value, x = timepoint),position = position_nudge(x = -0.23), data = subset(text_ver2, timepoint == "Baseline" & `LSHTM subcomponent` %in% c("tier1a", "tier2c", "tier3a", "tier4a")),
             hjust = 0, size = 4)+
   geom_text(aes(label = count, y = value, x = timepoint),position = position_nudge(x = +0.1), data = subset(text_ver2, timepoint == "End" & `LSHTM subcomponent` %in% c("tier1a", "tier2c", "tier3a", "tier4a")),
             hjust = 0, size = 4)+

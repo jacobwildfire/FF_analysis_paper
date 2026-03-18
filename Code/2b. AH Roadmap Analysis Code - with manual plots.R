@@ -1799,13 +1799,14 @@ paper_ah_time_plot <- df_surv_phase1_long_col %>%
              precore = "Precore",
              not_applicable = "Not applicable"
   ))+
+  ggtitle("Animal Health")+
   xlab("")+
   ylab("Number of sites")+
   scale_x_date(breaks = scales::pretty_breaks())+
   scale_y_continuous(breaks = scales::pretty_breaks())+
   theme(axis.text = element_text(size = 12), strip.text = element_text(size = 12),
         legend.text = element_text(size = 12), axis.title = element_text(size = 12),
-        legend.title = element_text(size = 12),)
+        legend.title = element_text(size = 12), plot.title=element_text(hjust=0.5, face = "bold"))
 
 paper_ah_change_plot <- ggplot() +
   facet_wrap(~`LSHTM subcomponent`,
@@ -1895,8 +1896,8 @@ ggsave(paste0("Figures/Drafts/AH 4. surv_phase1_sites_count_change_paper",".png"
 ggsave(paste0("Figures/Drafts/AH 4. surv_phase1_sites_count_change_paper_v2",".png"), paper_ah_change_plot_v2, width = 9, height = 5, dpi =300)
 
 
-overall_plot <- (paper_hh_time_plot + paper_ah_time_plot + plot_layout(axis_titles = "collect_y", guides = "collect"))/(paper_hh_change_plot + paper_ah_change_plot + plot_layout(axis_titles = "collect_y", axes = "collect_y"))
-overall_plot_v2 <- (paper_hh_time_plot + paper_ah_time_plot + plot_layout(axis_titles = "collect_y", guides = "collect"))/(paper_hh_change_plot_v2 + paper_ah_change_plot_v2 + plot_layout(axis_titles = "collect_y", axes = "collect_y"))
+overall_plot <- (paper_hh_time_plot + paper_ah_time_plot + plot_layout(axis_titles = "collect_y", guides = "collect"))/plot_spacer()/(paper_hh_change_plot + paper_ah_change_plot + plot_layout(axis_titles = "collect_y", axes = "collect_y"))+plot_layout(heights = c(1,0.01,1))
+overall_plot_v2 <- (paper_hh_time_plot + paper_ah_time_plot + plot_layout(axis_titles = "collect_y", guides = "collect"))/plot_spacer()/(paper_hh_change_plot_v2 + paper_ah_change_plot_v2 + plot_layout(axis_titles = "collect_y", axes = "collect_y"))+plot_layout(heights = c(1,0.01,1))
 
 
 ggsave(paste0("Figures/Drafts/Figure1",".png"), overall_plot, width = 15, height = 10, dpi =300)
