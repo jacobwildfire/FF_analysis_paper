@@ -500,7 +500,8 @@ df_dif3 <- df_dif2 %>%
 
 #df_dif5 <- rbind(df_dif4, extra1,extra2)
 
-plot_dif <- df_dif3 %>%
+plot_dif_pakistan_collection <- df_dif3 %>%
+  subset(`LSHTM subcomponent` %in% c("tier1a","tier2d","tier3a","tier4a")) %>%
   mutate(Level = factor(Level, levels = c("not_applicable","advanced","extended","core","precore"))) %>%
   ggplot(aes(x= reporting.month, y = adj.sites.int, fill = Level))+
   geom_col(width = 1)+
@@ -522,4 +523,15 @@ plot_dif <- df_dif3 %>%
   xlab("Reporting timepoint")+
   ylab("Number of sites")+
   theme(axis.text = element_text(size = 12), strip.text = element_text(size = 12),
-        legend.text = element_text(size = 12), axis.y.title = element_text(size = 12))
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 12), axis.title = element_text(size = 12))
+
+plotx <- plot_dif_malawi + plot_dif_pakistan + plot_layout(axis_titles = "collect", guides = "collect")
+plot4a <- plot_dif_malawi_4a + plot_dif_pakistan_4a + plot_layout(axis_titles = "collect", guides = "collect")+
+  plot_annotation(tag_levels = list(c("a.","b.")))
+plotcollection <- plot_dif_malawi_collection + plot_dif_pakistan_collection + plot_layout(axis_titles = "collect", guides = "collect")+
+  plot_annotation(tag_levels = list(c("a.","b.")))
+
+ggsave("Figures/Drafts/Figure2_4a.png", plot4a, height = 3, width = 8)
+ggsave("Figures/Drafts/Figure2_2d.png", plotx, height = 3, width = 8)
+ggsave("Figures/Drafts/Figure2_collection.png", plotcollection, height = 5.5, width = 14)
